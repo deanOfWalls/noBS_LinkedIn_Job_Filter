@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "noBS LinkedIn Job Filter",
+  "version": "1.0",
+  "description": "Filter LinkedIn job results to real entry-level positions.",
+  "permissions": ["activeTab", "storage"],
+  "icons": {
+    "48": "noBS.png"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.linkedin.com/jobs/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
