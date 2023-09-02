@@ -13,8 +13,8 @@ function filterJobListings(keywords) {
     });
   }
   
-  // Listen for messages from popup.js
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+// Listen for messages from popup.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'updateKeywords') {
       console.log("Received message:", message);
       console.log("Filtering job listings with keywords:", message.keywords);
