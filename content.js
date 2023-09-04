@@ -7,7 +7,7 @@ function showOverlay() {
     const overlayHTML = `
       <div id="overlay">
         <label for="zipCode">Zip Code:</label>
-        <input type="text" id="zipCode" value=""><br>
+        <input type="text" id="zipCode" value="" autocomplete="off"><br>
         
         <label for="distance">Distance:</label>
         <select id="distance">
@@ -49,133 +49,156 @@ function showOverlay() {
     document.body.appendChild(overlay);
 
     // Set saved values to the elements
-    document.getElementById('country').value = items.country || 'USA';
-    document.getElementById('timePosted').value = items.timePosted || 'anytime';
-    document.getElementById('remote').value = items.remote || 'No';
+    if (document.getElementById('country')) {
+      document.getElementById('country').value = items.country || 'USA';
+    }
+    if (document.getElementById('timePosted')) {
+      document.getElementById('timePosted').value = items.timePosted || 'anytime';
+    }
+    if (document.getElementById('remote')) {
+      document.getElementById('remote').value = items.remote || 'No';
+    }
 
     // Event listener for the "Search" button
-document.getElementById('searchButton').addEventListener('click', function () {
-  const country = document.getElementById('country').value;
-  const timePosted = document.getElementById('timePosted').value;
-  const remote = document.getElementById('remote').value;
-  const distance = document.getElementById('distance').value;
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+      searchButton.addEventListener('click', function () {
+        const countryElem = document.getElementById('country');
+        const timePostedElem = document.getElementById('timePosted');
+        const remoteElem = document.getElementById('remote');
+        const distanceElem = document.getElementById('distance');
+        const zipCodeElem = document.getElementById('zipCode');
 
-  // Fetch location details using Zippopotamus HTTPS API
-  const zipCode = document.getElementById('zipCode').value;
+        const country = countryElem ? countryElem.value : null;
+        const timePosted = timePostedElem ? timePostedElem.value : null;
+        const remote = remoteElem ? remoteElem.value : null;
+        const distance = distanceElem ? distanceElem.value : null;
+        const zipCode = zipCodeElem ? zipCodeElem.value : null;
 
-      if (zipCode) {
-        fetch(`https://api.zippopotam.us/us/${zipCode}`)
-          .then(response => response.json())
-          .then(data => {
-            const city = data.places[0]['place name'];
-            const state = data.places[0]['state'];
+        // Fetch location details using Zippopotamus HTTPS API
+        if (zipCode) {
+          console.log("Before fetching from Zippopotamus, zipCode:", zipCode);
+          fetch(`https://api.zippopotam.us/us/${zipCode}`)
+            .then(response => response.json())
+            .then(data => {
+              const city = data.places[0]['place name'];
+              const state = data.places[0]['state'];
+              // Update the country to USA and fill city and state
+              document.getElementById('country').value = 'USA';
+              document.getElementById('zipCode').value = `${city}, ${state}`;
+              console.log("After updating from Zippopotamus, zipCode and country:", document.getElementById('zipCode').value, document.getElementById('country').value);
 
-            // Update the country to USA and fill city and state
-            document.getElementById('country').value = 'USA';
-            document.getElementById('zipCode').value = `${zipCode} ${city}, ${state}, United States`;
+              // Construct LinkedIn URL
+              const jobId = getCurrentJobId();
+              const location = `${city}, ${state}`;
+              const baseURL = 'https://www.linkedin.com/jobs/search/?';
+              const queryParams = new URLSearchParams({
+                country: 'USA',
+                currentJobId: jobId,
+                geoId: 105328404,
+                location: location,
+                refresh: true
+              });
 
-            // Construct LinkedIn URL
-            const jobId = getCurrentJobId();
-            const location = `${zipCode}, ${city}, ${state}, United States`;
-            const baseURL = 'https://www.linkedin.com/jobs/search/?';
-            const queryParams = new URLSearchParams({
-              country: 'USA',
-              currentJobId: jobId,
-              geoId: 105328404,
-              location: location,
-              refresh: true
+              if (distance !== 'none') {
+                queryParams.append('distance', distance);
+              }
+
+              if (timePosted === 'past24Hours') {
+                queryParams.append('f_TPR', 'r86400');
+              } else if (timePosted === 'pastWeek') {
+                queryParams.append('f_TPR', 'r604800');
+              } else if (timePosted === 'pastMonth') {
+                queryParams.append('f_TPR', 'r2592000');
+              }
+
+              if (remote === 'Yes') {
+                queryParams.append('f_WT', '2');
+              }
+
+              // Navigate to the URL
+              const fullURL = `${baseURL}${queryParams.toString()}`;
+              window.location.href = fullURL;
+
+              saveUserSelections(country, timePosted, remote);
+              hideOverlay();
+
+            })
+            .catch(error => {
+              console.error('An error occurred:', error);
             });
 
-            if (distance !== 'none') {
-              queryParams.append('distance', distance);
-            }
 
-            if (timePosted === 'past24Hours') {
-              queryParams.append('f_TPR', 'r86400');
-            } else if (timePosted === 'pastWeek') {
-              queryParams.append('f_TPR', 'r604800');
-            } else if (timePosted === 'pastMonth') {
-              queryParams.append('f_TPR', 'r2592000');
-            }
-
-            if (remote === 'Yes') {
-              queryParams.append('f_WT', '2');
-            }
-
-            const fullURL = `${baseURL}${queryParams.toString()}`;
-
-            // Navigate to the URL
-            window.location.href = fullURL;
-          })
-          .catch(error => {
-            console.error('An error occurred:', error);
+        } else {
+          // No zip code entered, use country as search term
+          const jobId = getCurrentJobId();
+          const baseURL = 'https://www.linkedin.com/jobs/search/?';
+          const queryParams = new URLSearchParams({
+            currentJobId: jobId,
+            country: country,
+            refresh: true
           });
-      } else {
-        // No zip code entered, use country as search term
-        const jobId = getCurrentJobId();
-        const baseURL = 'https://www.linkedin.com/jobs/search/?';
-        const queryParams = new URLSearchParams({
-          currentJobId: jobId,
-          country: country,
-          refresh: true
-        });
 
-        if (distance !== 'none') {
-          queryParams.append('distance', distance);
+          if (distance !== 'none') {
+            queryParams.append('distance', distance);
+          }
+
+          if (timePosted === 'past24Hours') {
+            queryParams.append('f_TPR', 'r86400');
+          } else if (timePosted === 'pastWeek') {
+            queryParams.append('f_TPR', 'r604800');
+          } else if (timePosted === 'pastMonth') {
+            queryParams.append('f_TPR', 'r2592000');
+          }
+
+          if (remote === 'Yes') {
+            queryParams.append('f_WT', '2');
+          }
+
+          const fullURL = `${baseURL}${queryParams.toString()}`;
+
+          // Navigate to the URL
+          window.location.href = fullURL;
+
+          saveUserSelections(country, timePosted, remote);
+          hideOverlay();
+
         }
-
-        if (timePosted === 'past24Hours') {
-          queryParams.append('f_TPR', 'r86400');
-        } else if (timePosted === 'pastWeek') {
-          queryParams.append('f_TPR', 'r604800');
-        } else if (timePosted === 'pastMonth') {
-          queryParams.append('f_TPR', 'r2592000');
-        }
-
-        if (remote === 'Yes') {
-          queryParams.append('f_WT', '2');
-        }
-
-        const fullURL = `${baseURL}${queryParams.toString()}`;
-
-        // Navigate to the URL
-        window.location.href = fullURL;
-      }
-    });
+      });
+    } else {
+      console.error('Search button element not found');
+    }
   });
 }
 
-// Function to hide the UI overlay
 function hideOverlay() {
   const overlay = document.getElementById('overlay');
   if (overlay) {
     overlay.remove();
+    overlayVisible = false;
   }
 }
 
-// Function to get the currentJobId from the URL
 function getCurrentJobId() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
   return params.get('currentJobId');
 }
 
-// Declare and initialize the button variable
 const button = document.createElement('button');
 button.id = 'overlayButton';
 button.style.backgroundImage = `url(${chrome.runtime.getURL('noBS.png')})`;
 document.body.appendChild(button);
 
-// Log for debugging
 console.log('Content script running');
 console.log(button);
 console.log(chrome.runtime.getURL('noBS.png'));
 
-// Variable to store the currentJobId
 let currentJobId = null;
 
-// Event listener for the overlay button
 button.addEventListener('click', function () {
+  console.log('Overlay button clicked');
+
   if (overlayVisible) {
     hideOverlay();
   } else {
@@ -185,7 +208,6 @@ button.addEventListener('click', function () {
   overlayVisible = !overlayVisible;
 });
 
-// Function to save user selections to Chrome storage
 function saveUserSelections(country, timePosted, remote) {
   chrome.storage.sync.set({
     country: country,
@@ -194,17 +216,20 @@ function saveUserSelections(country, timePosted, remote) {
   });
 }
 
-// Load user selections from Chrome storage
 function loadUserSelections() {
-  chrome.storage.sync.get(['country', 'timePosted', 'remote'], function (items) {
-    document.getElementById('country').value = items.country || 'USA';
-    document.getElementById('timePosted').value = items.timePosted || 'anytime';
-    document.getElementById('remote').value = items.remote || 'No';
-  });
+  if (chrome.storage) {
+    chrome.storage.sync.get(['country', 'timePosted', 'remote'], function (items) {
+      if (document.getElementById('country')) {
+        document.getElementById('country').value = items.country || 'USA';
+      }
+      if (document.getElementById('timePosted')) {
+        document.getElementById('timePosted').value = items.timePosted || 'anytime';
+      }
+      if (document.getElementById('remote')) {
+        document.getElementById('remote').value = items.remote || 'No';
+      }
+    });
+  } else {
+    console.error('chrome.storage is not available');
+  }
 }
-
-// Load user selections when the overlay button is clicked
-button.addEventListener('click', function () {
-  loadUserSelections();
-});
-
