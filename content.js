@@ -77,25 +77,27 @@ function showOverlay() {
 
         // Fetch location details using Zippopotamus HTTPS API
         if (zipCode) {
-          console.log("Before fetching from Zippopotamus, zipCode:", zipCode);
           fetch(`https://api.zippopotam.us/us/${zipCode}`)
             .then(response => response.json())
             .then(data => {
               const city = data.places[0]['place name'];
               const state = data.places[0]['state'];
+              const country = 'United States'; // You can also fetch this dynamically if needed
               // Update the country to USA and fill city and state
-              document.getElementById('country').value = 'USA';
-              document.getElementById('zipCode').value = `${city}, ${state}`;
-              console.log("After updating from Zippopotamus, zipCode and country:", document.getElementById('zipCode').value, document.getElementById('country').value);
+              if (document.getElementById('country') && document.getElementById('zipCode')) {
+                document.getElementById('country').value = 'USA';
+                document.getElementById('zipCode').value = `${city}, ${state}`;
+              }
 
               // Construct LinkedIn URL
               const jobId = getCurrentJobId();
-              const location = `${city}, ${state}`;
+              const location = `${zipCode}, ${city}, ${state}, ${country}`;
+              const geoId = '102233366'; // This should ideally be dynamically determined
               const baseURL = 'https://www.linkedin.com/jobs/search/?';
               const queryParams = new URLSearchParams({
                 country: 'USA',
                 currentJobId: jobId,
-                geoId: 105328404,
+                geoId: geoId,
                 location: location,
                 refresh: true
               });
