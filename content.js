@@ -1,13 +1,57 @@
 // Variable to store the state of the overlay
 let overlayVisible = false;
 
+function buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote) {
+  const jobId = getCurrentJobId();
+  const location = `${city}, ${state}, ${country}`;
+  const baseURL = 'https://www.linkedin.com/jobs/search/?';
+
+  let urlParams = [
+    `country=USA`,
+    `currentJobId=${jobId}`,
+    `geoId=${geoId}`,
+    `location=${encodeURIComponent(location)}`,
+    `refresh=true`,
+    `keywords=${encodeURIComponent(keywords)}`,
+    `f_E=2`  // Entry-level flag
+  ];
+
+  if (distance !== 'none') {
+    urlParams.push(`distance=${distance}`);
+  }
+
+  if (timePosted === 'past24Hours') {
+    urlParams.push('f_TPR=r86400');
+  } else if (timePosted === 'pastWeek') {
+    urlParams.push('f_TPR=r604800');
+  } else if (timePosted === 'pastMonth') {
+    urlParams.push('f_TPR=r2592000');
+  }
+
+  if (remote === 'Yes') {
+    urlParams.push('f_WT=2');
+  }
+
+  const fullURL = `${baseURL}${urlParams.join('&')}`;
+  window.location.href = fullURL;
+}
+
+
 function showOverlay() {
-  // Retrieve saved settings
-  chrome.storage.sync.get(['country', 'timePosted', 'remote'], function (items) {
+  chrome.storage.sync.get(['country', 'timePosted', 'remote', 'cityStateValue', 'positiveTerms', 'negativeTerms', 'distance'], function (items) {
     const overlayHTML = `
       <div id="overlay">
-        <label for="zipCode">Zip Code:</label>
-        <input type="text" id="zipCode" value="" autocomplete="off"><br>
+        <label for="positiveTerms">Positive Search Terms:</label>
+        <input type="text" id="positiveTerms" value="" autocomplete="off"><br>
+        
+        <label for="negativeTerms">Negative Search Terms:</label>
+        <input type="text" id="negativeTerms" value="" autocomplete="off"><br>
+
+        <label for="cityState">City/State:</label>
+        <select id="cityState">
+          <option value="New Castle, Delaware, 101877462">New Castle, Delaware</option>
+          <option value="Philadelphia, Pennsylvania, 104937023">Philadelphia, Pennsylvania</option>
+        </select><br>
         
         <label for="distance">Distance:</label>
         <select id="distance">
@@ -24,7 +68,6 @@ function showOverlay() {
         <select id="country">
           <option value="USA">USA</option>
           <option value="Canada">Canada</option>
-          <!-- Add more countries here -->
         </select><br>
         
         <label for="timePosted">Time Posted:</label>
@@ -42,134 +85,64 @@ function showOverlay() {
         </select><br>
         
         <button id="searchButton">Search</button>
+        <a href="http://www.deanwalls.com" target="_blank" id="deanWallsLink">
+        <span style="--i:1">w</span>
+        <span style="--i:2">w</span>
+        <span style="--i:3">w</span>
+        <span style="--i:4">.</span>
+        <span style="--i:5">d</span>
+        <span style="--i:6">e</span>
+        <span style="--i:7">a</span>
+        <span style="--i:8">n</span>
+        <span style="--i:9">w</span>
+        <span style="--i:10">a</span>
+        <span style="--i:11">l</span>
+        <span style="--i:12">l</span>
+        <span style="--i:13">s</span>
+        <span style="--i:14">.</span>
+        <span style="--i:15">c</span>
+        <span style="--i:16">o</span>
+        <span style="--i:17">m</span>
+      </a>
+      
       </div>
     `;
     const overlay = document.createElement('div');
     overlay.innerHTML = overlayHTML;
     document.body.appendChild(overlay);
 
-    // Set saved values to the elements
-    if (document.getElementById('country')) {
-      document.getElementById('country').value = items.country || 'USA';
-    }
-    if (document.getElementById('timePosted')) {
-      document.getElementById('timePosted').value = items.timePosted || 'anytime';
-    }
-    if (document.getElementById('remote')) {
-      document.getElementById('remote').value = items.remote || 'No';
-    }
+    document.getElementById('positiveTerms').value = items.positiveTerms || '';
+    document.getElementById('negativeTerms').value = items.negativeTerms || '';
+    document.getElementById('cityState').value = items.cityState || 'New Castle, Delaware, 101877462';
+    document.getElementById('distance').value = items.distance || 'none';  // Fetch distance here
+    document.getElementById('country').value = items.country || 'USA';
+    document.getElementById('timePosted').value = items.timePosted || 'anytime';
+    document.getElementById('remote').value = items.remote || 'No';
 
-    // Event listener for the "Search" button
     const searchButton = document.getElementById('searchButton');
-    if (searchButton) {
-      searchButton.addEventListener('click', function () {
-        const countryElem = document.getElementById('country');
-        const timePostedElem = document.getElementById('timePosted');
-        const remoteElem = document.getElementById('remote');
-        const distanceElem = document.getElementById('distance');
-        const zipCodeElem = document.getElementById('zipCode');
+    searchButton.addEventListener('click', function () {
+      const cityStateElem = document.getElementById('cityState');
+      const cityStateValue = cityStateElem.value;
+      const [city, state, geoId] = cityStateValue.split(', ');
 
-        const country = countryElem ? countryElem.value : null;
-        const timePosted = timePostedElem ? timePostedElem.value : null;
-        const remote = remoteElem ? remoteElem.value : null;
-        const distance = distanceElem ? distanceElem.value : null;
-        const zipCode = zipCodeElem ? zipCodeElem.value : null;
+      const country = document.getElementById('country').value;
+      const timePosted = document.getElementById('timePosted').value;
+      const remote = document.getElementById('remote').value;
+      const distance = document.getElementById('distance').value;
+      const positiveTerms = document.getElementById('positiveTerms').value;
+      const negativeTerms = document.getElementById('negativeTerms').value;
 
-        // Fetch location details using Zippopotamus HTTPS API
-        if (zipCode) {
-          fetch(`https://api.zippopotam.us/us/${zipCode}`)
-            .then(response => response.json())
-            .then(data => {
-              const city = data.places[0]['place name'];
-              const state = data.places[0]['state'];
-              const country = 'United States'; // You can also fetch this dynamically if needed
-              // Update the country to USA and fill city and state
-              if (document.getElementById('country') && document.getElementById('zipCode')) {
-                document.getElementById('country').value = 'USA';
-                document.getElementById('zipCode').value = `${city}, ${state}`;
-              }
+      let keywords = positiveTerms;
+      if (negativeTerms) {
+        const negativeTermsArray = negativeTerms.split(' ');
+        const negativeTermsString = negativeTermsArray.map(term => `NOT ${term}`).join(' ');
+        keywords = `${positiveTerms} ${negativeTermsString}`;
+      }
 
-              // Construct LinkedIn URL
-              const jobId = getCurrentJobId();
-              const location = `${zipCode}, ${city}, ${state}, ${country}`;
-              const geoId = '102233366'; // This should ideally be dynamically determined
-              const baseURL = 'https://www.linkedin.com/jobs/search/?';
-              const queryParams = new URLSearchParams({
-                country: 'USA',
-                currentJobId: jobId,
-                geoId: geoId,
-                location: location,
-                refresh: true
-              });
-
-              if (distance !== 'none') {
-                queryParams.append('distance', distance);
-              }
-
-              if (timePosted === 'past24Hours') {
-                queryParams.append('f_TPR', 'r86400');
-              } else if (timePosted === 'pastWeek') {
-                queryParams.append('f_TPR', 'r604800');
-              } else if (timePosted === 'pastMonth') {
-                queryParams.append('f_TPR', 'r2592000');
-              }
-
-              if (remote === 'Yes') {
-                queryParams.append('f_WT', '2');
-              }
-
-              // Navigate to the URL
-              const fullURL = `${baseURL}${queryParams.toString()}`;
-              window.location.href = fullURL;
-
-              saveUserSelections(country, timePosted, remote);
-              hideOverlay();
-
-            })
-            .catch(error => {
-              console.error('An error occurred:', error);
-            });
-
-
-        } else {
-          // No zip code entered, use country as search term
-          const jobId = getCurrentJobId();
-          const baseURL = 'https://www.linkedin.com/jobs/search/?';
-          const queryParams = new URLSearchParams({
-            currentJobId: jobId,
-            country: country,
-            refresh: true
-          });
-
-          if (distance !== 'none') {
-            queryParams.append('distance', distance);
-          }
-
-          if (timePosted === 'past24Hours') {
-            queryParams.append('f_TPR', 'r86400');
-          } else if (timePosted === 'pastWeek') {
-            queryParams.append('f_TPR', 'r604800');
-          } else if (timePosted === 'pastMonth') {
-            queryParams.append('f_TPR', 'r2592000');
-          }
-
-          if (remote === 'Yes') {
-            queryParams.append('f_WT', '2');
-          }
-
-          const fullURL = `${baseURL}${queryParams.toString()}`;
-
-          // Navigate to the URL
-          window.location.href = fullURL;
-
-          saveUserSelections(country, timePosted, remote);
-          hideOverlay();
-
-        }
-      });
-    } else {
-      console.error('Search button element not found');
-    }
+      buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote);
+      saveUserSelections(country, timePosted, remote, cityStateValue, positiveTerms, negativeTerms, distance);  // Pass distance here
+      hideOverlay();
+    });
   });
 }
 
@@ -192,46 +165,47 @@ button.id = 'overlayButton';
 button.style.backgroundImage = `url(${chrome.runtime.getURL('noBS.png')})`;
 document.body.appendChild(button);
 
-console.log('Content script running');
-console.log(button);
-console.log(chrome.runtime.getURL('noBS.png'));
-
-let currentJobId = null;
-
 button.addEventListener('click', function () {
-  console.log('Overlay button clicked');
-
   if (overlayVisible) {
     hideOverlay();
   } else {
-    currentJobId = getCurrentJobId();
     showOverlay();
+    
   }
   overlayVisible = !overlayVisible;
 });
 
-function saveUserSelections(country, timePosted, remote) {
+function saveUserSelections(country, timePosted, remote, cityStateValue, positiveTerms, negativeTerms, distance) {
   chrome.storage.sync.set({
     country: country,
     timePosted: timePosted,
-    remote: remote
+    remote: remote,
+    cityStateValue: cityStateValue,
+    positiveTerms: positiveTerms,
+    negativeTerms: negativeTerms,
+    distance: distance  // Save distance here
+  }, function() {
+    if (chrome.runtime.lastError) {
+      console.error("Error saving distance:", chrome.runtime.lastError);
+    } else {
+      console.log("Distance saved:", distance);
+    }
   });
 }
 
 function loadUserSelections() {
   if (chrome.storage) {
-    chrome.storage.sync.get(['country', 'timePosted', 'remote'], function (items) {
-      if (document.getElementById('country')) {
-        document.getElementById('country').value = items.country || 'USA';
+    chrome.storage.sync.get(['country', 'timePosted', 'remote', 'cityStateValue', 'positiveTerms', 'negativeTerms'], function (items) {
+      if (document.getElementById('cityState')) {
+        document.getElementById('cityState').value = items.cityStateValue || 'New Castle, Delaware, 101877462';
       }
-      if (document.getElementById('timePosted')) {
-        document.getElementById('timePosted').value = items.timePosted || 'anytime';
+      if (document.getElementById('distance')) {
+        document.getElementById('distance').value = items.distance || 'none';
       }
-      if (document.getElementById('remote')) {
-        document.getElementById('remote').value = items.remote || 'No';
-      }
+      // ... (existing code)
     });
   } else {
     console.error('chrome.storage is not available');
   }
 }
+
