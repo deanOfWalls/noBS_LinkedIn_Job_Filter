@@ -1,0 +1,15 @@
+#overlayButton {
+    /* background-color:red; */
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999999;
+    width: 48px;  /* You can change this */
+    height: 48px;  /* You can change this */
+    background-image: url('noBS.png');
+    background-size: cover;  /* This will cover the entire element */
+    background-repeat: no-repeat;  /* Prevent image from repeating */
+    border: none;
+    cursor: pointer;
+  }
+  
