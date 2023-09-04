@@ -1,8 +1,8 @@
 #overlayButton {
     /* background-color:red; */
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 10px;
+    left: 10px;
     z-index: 9999999;
     width: 48px;  /* You can change this */
     height: 48px;  /* You can change this */
@@ -11,5 +11,21 @@
     background-repeat: no-repeat;  /* Prevent image from repeating */
     border: none;
     cursor: pointer;
+    opacity: 0.75;
   }
+
+  #overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    background-color: rgba(16, 16, 16, 0.9); /* Semi-transparent white background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Optional shadow for better visibility */
+    border: 2px solid #ffffff;
+    width: 400px;
+}
+  
   
