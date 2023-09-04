@@ -8,13 +8,16 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
 
   let urlParams = [
     `country=USA`,
-    `currentJobId=${jobId}`,
     `geoId=${geoId}`,
     `location=${encodeURIComponent(location)}`,
     `refresh=true`,
     `keywords=${encodeURIComponent(keywords)}`,
     `f_E=2`  // Entry-level flag
   ];
+
+  if (jobId) {
+    urlParams.push(`currentJobId=${jobId}`);
+  }
 
   if (distance !== 'none') {
     urlParams.push(`distance=${distance}`);
@@ -35,6 +38,7 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
   const fullURL = `${baseURL}${urlParams.join('&')}`;
   window.location.href = fullURL;
 }
+
 
 
 function showOverlay() {

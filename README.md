@@ -1,21 +1,53 @@
-#noBS LinkedIn Job Filter
+# noBS LinkedIn Job Filter
 
-##Identifying URL Parameters
-1. Location ('location'): ZIP code, city, or country. URL-encoded.
-2. Distance ('distance'): Distance in miles or km from the location.
-3. Experience Level ('f_E'): Filters by experience level.
-4. Time Posted ('f_TPR'): Filters by time job was posted.
+## Introduction
 
-##User Input Fields
-1. Location: ZIP code or country.
-2. Positive Terms: Terms to include in search.
-3. Negative Terms: Terms to exclude from search.
+This Chrome extension is designed to filter out non-entry-level jobs on LinkedIn, as the platform's native filtering system often falls short in this regard. It allows you to specify search terms, location, distance, and other parameters to find jobs that match your criteria. The extension also saves your preferences for future use.
 
-##Challenges and Solutions
-*Location Auto-fill*
--Challenge: Linked-in's search bar has an auto-fill feature for locations.
--Solution: Use a ZIP code to city/state/coutnry mapping API and for countries use a pre-defined list.
-	
-*Formatting Search Terms*
--Challenge: Search terms need to be formatted correctly for URL encoding
--Solution: Programatically format positive and negative search terms.
+## Setup Instructions
+
+### Step 1: Load the Extension
+
+- Navigate to `chrome://extensions/` in your Chrome browser.
+- Click on the "Load unpacked" button.
+
+![Step 1](./step1.png)
+
+### Step 2: Select the Repository Folder
+
+- Navigate to the folder where you have cloned or downloaded this repository.
+- Select the folder and click "Open".
+
+![Step 2](./step2.png)
+
+### Step 3: Enable the Extension
+
+- Make sure the toggle next to the extension is in the "On" position to enable it.
+
+![Step 3](./step3.png)
+
+### Step 4: Open the UI Panel
+
+- After enabling the extension, you should see a UI button (usually at the top-right corner of your browser).
+- Click on this button to open the UI panel.
+
+![Step 4](./step4.png)
+
+### Step 5: Enter Your Search Terms
+
+- The UI panel allows you to enter various search terms and parameters.
+- After entering your desired terms, click on the "Search" button to execute the job search.
+
+![Step 5](./step5.png)
+
+## Usage
+
+Once the extension is set up, you can open the UI panel at any time by clicking the UI button. Enter your search terms and other parameters, and click "Search" to find jobs that match your criteria.
+
+## Contributing
+
+If you find any bugs or have suggestions for improvements, feel free to open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
