@@ -8,16 +8,13 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
 
   let urlParams = [
     `country=USA`,
+    `currentJobId=${jobId}`,
     `geoId=${geoId}`,
     `location=${encodeURIComponent(location)}`,
     `refresh=true`,
     `keywords=${encodeURIComponent(keywords)}`,
     `f_E=2`  // Entry-level flag
   ];
-
-  if (jobId) {
-    urlParams.push(`currentJobId=${jobId}`);
-  }
 
   if (distance !== 'none') {
     urlParams.push(`distance=${distance}`);
@@ -40,7 +37,6 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
 }
 
 
-
 function showOverlay() {
   chrome.storage.sync.get(['country', 'timePosted', 'remote', 'cityStateValue', 'positiveTerms', 'negativeTerms', 'distance'], function (items) {
     const overlayHTML = `
@@ -49,8 +45,11 @@ function showOverlay() {
         <input type="text" id="positiveTerms" value="" autocomplete="off"><br>
         
         <label for="negativeTerms">Negative Search Terms:</label>
-        <input type="text" id="negativeTerms" value="" autocomplete="off"><br>
-
+        <input type="text" id="negativeTerms" value="" list="defaultNegativeTerms" autocomplete="off"><br>
+        <datalist id="defaultNegativeTerms">
+          <option value="Senior, Lead, Manager, Director, Principal, Mid, Experienced, 4+, 5+, 6+, 7+, 8+, II, III, IV, V, VI, VII, VIII"></option>
+        </datalist>
+        
         <label for="cityState">City/State:</label>
         <select id="cityState">
           <option value="New Castle, Delaware, 101877462">New Castle, Delaware</option>
