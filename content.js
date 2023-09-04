@@ -2,7 +2,7 @@
 let overlayVisible = false;
 
 function buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote) {
-  const jobId = getCurrentJobId();
+  const jobId = getCurrentJobId(); // Correctly get the jobId
   const location = `${city}, ${state}, ${country}`;
   const baseURL = 'https://www.linkedin.com/jobs/search/?';
 
@@ -160,7 +160,8 @@ function hideOverlay() {
 function getCurrentJobId() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
-  return params.get('currentJobId');
+  const jobId = params.get('currentJobId'); // Get the currentJobId from the URL parameter
+  return jobId || '';
 }
 
 const button = document.createElement('button');
