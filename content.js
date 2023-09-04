@@ -54,14 +54,14 @@ function showOverlay() {
     document.getElementById('remote').value = items.remote || 'No';
 
     // Event listener for the "Search" button
-    document.getElementById('searchButton').addEventListener('click', function () {
-      const country = document.getElementById('country').value;
-      const timePosted = document.getElementById('timePosted').value;
-      const remote = document.getElementById('remote').value;
-      const distance = document.getElementById('distance').value;
+document.getElementById('searchButton').addEventListener('click', function () {
+  const country = document.getElementById('country').value;
+  const timePosted = document.getElementById('timePosted').value;
+  const remote = document.getElementById('remote').value;
+  const distance = document.getElementById('distance').value;
 
-      // Fetch location details using Zippopotamus HTTPS API
-      const zipCode = document.getElementById('zipCode').value;
+  // Fetch location details using Zippopotamus HTTPS API
+  const zipCode = document.getElementById('zipCode').value;
 
       if (zipCode) {
         fetch(`https://api.zippopotam.us/us/${zipCode}`)
@@ -184,3 +184,27 @@ button.addEventListener('click', function () {
   }
   overlayVisible = !overlayVisible;
 });
+
+// Function to save user selections to Chrome storage
+function saveUserSelections(country, timePosted, remote) {
+  chrome.storage.sync.set({
+    country: country,
+    timePosted: timePosted,
+    remote: remote
+  });
+}
+
+// Load user selections from Chrome storage
+function loadUserSelections() {
+  chrome.storage.sync.get(['country', 'timePosted', 'remote'], function (items) {
+    document.getElementById('country').value = items.country || 'USA';
+    document.getElementById('timePosted').value = items.timePosted || 'anytime';
+    document.getElementById('remote').value = items.remote || 'No';
+  });
+}
+
+// Load user selections when the overlay button is clicked
+button.addEventListener('click', function () {
+  loadUserSelections();
+});
+
