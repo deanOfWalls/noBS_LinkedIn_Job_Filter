@@ -3,7 +3,7 @@
   "name": "noBS LinkedIn Job Filter",
   "version": "1.0",
   "description": "Automate LinkedIn job search",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "storage"],
   "content_scripts": [
     {
       "matches": ["*://www.linkedin.com/*"],
