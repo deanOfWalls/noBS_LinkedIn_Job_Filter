@@ -24,7 +24,10 @@ function showOverlay() {
       </select><br>
       
       <label for="remote">Remote:</label>
-      <input type="checkbox" id="remote"><br>
+      <select id="remote">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select><br>
       
       <button id="searchButton">Search</button>
     </div>
@@ -35,19 +38,7 @@ function showOverlay() {
 
   // Event listener for the "Search" button
   document.getElementById('searchButton').addEventListener('click', function() {
-    const zipCode = document.getElementById('zipCode').value;
-    const country = document.getElementById('country').value;
-    const timePosted = document.getElementById('timePosted').value;
-    const remote = document.getElementById('remote').checked;
-    
-    // Construct LinkedIn URL
-    // TODO: Update this part to include new parameters
-    const baseURL = "https://www.linkedin.com/jobs/search/?";
-    const query = `currentJobId=${currentJobId}`;
-    const fullURL = `${baseURL}${query}`;
-    
-    // Navigate to the URL
-    window.location.href = fullURL;
+    // ... rest of the code
   });
 }
 
@@ -89,4 +80,39 @@ button.addEventListener('click', function() {
     showOverlay();
   }
   overlayVisible = !overlayVisible;
+});
+
+// Event listener for the "Search" button
+document.addEventListener('click', function(event) {
+  if (event.target.id === 'searchButton') {
+    const zipCode = document.getElementById('zipCode').value;
+    const country = document.getElementById('country').value;
+    const timePosted = document.getElementById('timePosted').value;
+    const remote = document.getElementById('remote').value === "true";
+
+    // Construct LinkedIn URL
+    const baseURL = "https://www.linkedin.com/jobs/search/?";
+    let query = `currentJobId=${currentJobId}`;
+    
+    if (zipCode) {
+      query += `&location=${zipCode}`;
+    }
+    
+    if (country) {
+      query += `&country=${country}`;
+    }
+    
+    if (timePosted) {
+      query += `&timePosted=${timePosted}`;
+    }
+    
+    if (remote) {
+      query += `&remote=true`;
+    }
+    
+    const fullURL = `${baseURL}${query}`;
+    
+    // Navigate to the URL
+    window.location.href = fullURL;
+  }
 });
