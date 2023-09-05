@@ -1,41 +1,30 @@
-// Variable to store the state of the overlay
-let overlayVisible = false;
+let overlayVisible = false; // Add this line to define overlayVisible
 
 function buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote) {
-  const jobId = getCurrentJobId(); // Correctly get the jobId
+  const jobId = getCurrentJobId();
   const location = `${city}, ${state}, ${country}`;
   const baseURL = 'https://www.linkedin.com/jobs/search/?';
 
   let urlParams = [
-    `country=USA`,
+    `country=${country}`,
     `currentJobId=${jobId}`,
     `geoId=${geoId}`,
-    `location=${encodeURIComponent(location)}`,
     `refresh=true`,
     `keywords=${encodeURIComponent(keywords)}`,
     `f_E=2`  // Entry-level flag
   ];
 
+  if (city.toLowerCase() !== 'none' && state.toLowerCase() !== 'none') {
+    urlParams.push(`location=${encodeURIComponent(location)}`);
+  }
+
   if (distance !== 'none') {
     urlParams.push(`distance=${distance}`);
-  }
-
-  if (timePosted === 'past24Hours') {
-    urlParams.push('f_TPR=r86400');
-  } else if (timePosted === 'pastWeek') {
-    urlParams.push('f_TPR=r604800');
-  } else if (timePosted === 'pastMonth') {
-    urlParams.push('f_TPR=r2592000');
-  }
-
-  if (remote === 'Yes') {
-    urlParams.push('f_WT=2');
   }
 
   const fullURL = `${baseURL}${urlParams.join('&')}`;
   window.location.href = fullURL;
 }
-
 
 function showOverlay() {
   chrome.storage.sync.get(['country', 'timePosted', 'remote', 'cityStateValue', 'positiveTerms', 'negativeTerms', 'distance'], function (items) {
@@ -123,7 +112,9 @@ function showOverlay() {
     document.getElementById('remote').value = items.remote || 'No';
 
     const searchButton = document.getElementById('searchButton');
-    searchButton.addEventListener('click', function () {
+    searchButton.addEventListener('click', function () {     
+   
+  
       const cityStateElem = document.getElementById('cityState');
       const cityStateValue = cityStateElem.value;
       const [city, state, geoId] = cityStateValue.split(', ');
@@ -135,15 +126,15 @@ function showOverlay() {
       const positiveTerms = document.getElementById('positiveTerms').value;
       const negativeTerms = document.getElementById('negativeTerms').value;
 
+      // Adjust keywords formatting
       let keywords = positiveTerms;
       if (negativeTerms) {
-        const negativeTermsArray = negativeTerms.split(' ');
-        const negativeTermsString = negativeTermsArray.map(term => `NOT ${term}`).join(' ');
-        keywords = `${positiveTerms} ${negativeTermsString}`;
+        const negativeTermsArray = negativeTerms.split(', ').map(term => `NOT ${term}`).join(' NOT ');
+        keywords = `${positiveTerms} NOT ${negativeTermsArray}`;
       }
 
       buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote);
-      saveUserSelections(country, timePosted, remote, cityStateValue, positiveTerms, negativeTerms, distance);  // Pass distance here
+      saveUserSelections(country, timePosted, remote, cityStateValue, positiveTerms, negativeTerms, distance);
       hideOverlay();
     });
   });
@@ -187,7 +178,7 @@ function saveUserSelections(country, timePosted, remote, cityStateValue, positiv
     cityStateValue: cityStateValue,
     positiveTerms: positiveTerms,
     negativeTerms: negativeTerms,
-    distance: distance  // Save distance here
+    distance: distance
   }, function() {
     if (chrome.runtime.lastError) {
       console.error("Error saving distance:", chrome.runtime.lastError);
@@ -206,10 +197,8 @@ function loadUserSelections() {
       if (document.getElementById('distance')) {
         document.getElementById('distance').value = items.distance || 'none';
       }
-      // ... (existing code)
     });
   } else {
     console.error('chrome.storage is not available');
   }
 }
-
