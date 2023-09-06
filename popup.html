@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>noBS LinkedIn Job Filter</title>
+  <style>
+    /* Add some basic styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 15px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="text"],
+    select {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    input[type="submit"] {
+      background-color: #0073b1;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>noBS LinkedIn Job Filter</h1>
+  <form id="searchForm">
+    <label for="positiveTerms">Positive Terms:</label>
+    <input type="text" id="positiveTerms"><br>
+
+    <label for="negativeTerms">Negative Terms:</label>
+    <input type="text" id="negativeTerms"><br>
+
+    <label for="zipCode">Zip Code:</label>
+    <input type="text" id="zipCode"><br>
+
+    <label for="distance">Distance:</label>
+    <select id="distance">
+      <option value="0">0 miles</option>
+      <option value="5">5 miles</option>
+      <option value="25">25 miles</option>
+      <option value="50">50 miles</option>
+      <option value="100">100 miles</option>
+    </select><br>
+
+    <label for="country">Country:</label>
+    <select id="country">
+      <option value="none">None</option>
+      <option value="USA">USA</option>
+      <option value="Canada">Canada</option>
+    </select><br>
+
+    <label for="timePosted">Time Posted:</label>
+    <select id="timePosted">
+      <option value="any">Any time</option>
+      <option value="24">Past 24 hours</option>
+      <option value="week">Past week</option>
+    </select><br>
+
+    <input type="submit" value="Apply Filter">
+  </form>
+</body>
+</html>

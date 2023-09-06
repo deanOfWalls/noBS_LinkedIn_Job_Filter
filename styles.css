@@ -1,77 +1,57 @@
-#overlayButton {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 9999999;
-    width: 48px;
-    height: 48px;
-    background-image: url('noBS.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    border: none;
-    cursor: pointer;
-    opacity: 0.75;
-}
+// Import the required packages
+const { Builder, By, Key, until } = require('selenium-webdriver');
 
-#overlay {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    background-color: rgba(16, 16, 16, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    border: 2px solid #ffffff;
-    width: 400px;
-}
+// Function to inject search terms using Selenium
+async function injectSearchTerms(searchTerms, entryLevel, cityState, distance, country, timePosted, remote) {
+  const driver = await new Builder().forBrowser('chrome').build();
 
-#searchButton {
-    margin-top: 10px;
-    background-color: #1a9562;
-    color: rgb(255, 255, 255);
-    border: 1px solid #ffffff;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 4px;
-}
+  try {
+    await driver.get('https://www.linkedin.com/jobs/search/?currentJobId=*');
 
-#remoteDiv {
-    display: flex;
-    align-items: center;
-}
+    // Inject search terms
+    await driver.findElement(By.id('jobs-search-box-keyword-id-ember26')).sendKeys(searchTerms, Key.RETURN);
 
-#deanWallsLink {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    font-size: 12px;
-}
-
-
-
-/* Wavy Animation Keyframes */
-@keyframes wave-text {
-
-    0%,
-    100% {
-        transform: translateY(0);
+    // Select entry level
+    if (entryLevel) {
+      await driver.findElement(By.id('searchFilter_experience')).click();
+      await driver.findElement(By.xpath('//span[text()="Entry level"]')).click();
     }
 
-    50% {
-        transform: translateY(-3px);
+    // Inject city/state or country
+    if (cityState) {
+      await driver.findElement(By.id('jobs-search-box-location-id-ember26')).sendKeys(cityState, Key.RETURN);
+    } else if (country) {
+      await driver.findElement(By.id('jobs-search-box-location-id-ember26')).sendKeys(country, Key.RETURN);
     }
-}
 
-/* Apply Animation to Each Letter */
-#deanWallsLink span {
-    display: inline-block;
-    animation: wave-text 1s ease-in-out infinite;
-    animation-delay: calc(0.1s * var(--i));
-}
+    // Inject distance if applicable
+    if (distance) {
+      await driver.findElement(By.id('ember163')).click();
+      await driver.findElement(By.xpath(`//span[text()="${distance} mi"]`)).click();
+    }
 
-/* Remove Underline on Hover */
-#deanWallsLink:hover {
-    text-decoration: none;
+    // Inject time posted
+    await driver.findElement(By.id('searchFilter_timePostedRange')).click();
+    await driver.findElement(By.xpath(`//span[text()="${timePosted}"]`)).click();
+
+    // Inject remote option
+    if (remote) {
+      await driver.findElement(By.id('searchFilter_workplaceType')).click();
+      await driver.findElement(By.xpath(`//span[text()="${remote}"]`)).click();
+    }
+
+    // Click the search button
+    await driver.findElement(By.id('searchButton')).click();
+
+    // Wait for the search results to load
+    await driver.wait(until.elementLocated(By.css('.search-results')), 10000);
+  } finally {
+    // Quit the driver when done
+    await driver.quit();
   }
+}
+
+// Event listener for search button
+searchButton.addEventListener('click', async function () {
+  injectSearchTerms(searchTerms, entryLevel, cityStateValue, distance, country, timePosted, remote);
+});
