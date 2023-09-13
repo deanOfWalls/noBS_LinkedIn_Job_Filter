@@ -14,6 +14,10 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
     `f_E=2`  // Entry-level flag
   ];
 
+  if (timePosted === 'past24Hours') {
+    urlParams.push(`f_TPR=r86400`);  // Jobs posted within the last 24 hours
+  }
+
   if (city.toLowerCase() !== 'none' && state.toLowerCase() !== 'none') {
     urlParams.push(`location=${encodeURIComponent(location)}`);
   }
