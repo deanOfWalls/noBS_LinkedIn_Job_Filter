@@ -133,8 +133,8 @@ function showOverlay() {
       // Adjust keywords formatting
       let keywords = positiveTerms;
       if (negativeTerms) {
-        const negativeTermsArray = negativeTerms.split(', ').map(term => `NOT ${term}`).join(' NOT ');
-        keywords = `${positiveTerms} NOT ${negativeTermsArray}`;
+        const negativeTermsArray = negativeTerms.split(', ').map(term => term.trim());
+        keywords = `${positiveTerms} NOT ${negativeTermsArray.join(' NOT ')}`;
       }
 
       buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote);
