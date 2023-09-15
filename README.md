@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Chrome extension is designed to filter out non-entry-level jobs on LinkedIn, as the platform's native filtering system often falls short in this regard. It allows you to specify search terms, location, distance, and other parameters to find jobs that match your criteria. The extension also saves your preferences for future use.
+This Chrome extension is designed to filter out non-entry-level jobs on LinkedIn, as the platform's native filtering system often falls short in this regard. It allows you to specify search terms, location, distance, and other parameters to find jobs that match your criteria. The extension also saves your preferences for future use. *Extension styling currently only works with dark mode.*
 
 ## Setup Instructions
 
