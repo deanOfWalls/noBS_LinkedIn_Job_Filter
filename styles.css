@@ -49,29 +49,128 @@
     font-size: 12px;
 }
 
-
-
-/* Wavy Animation Keyframes */
 @keyframes wave-text {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-3px);
     }
 }
 
-/* Apply Animation to Each Letter */
 #deanWallsLink span {
     display: inline-block;
     animation: wave-text 1s ease-in-out infinite;
     animation-delay: calc(0.1s * var(--i));
 }
 
-/* Remove Underline on Hover */
 #deanWallsLink:hover {
     text-decoration: none;
-  }
+}
+
+.light-mode #overlay {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border: 2px solid #000;
+}
+
+.light-mode #searchButton {
+    background-color: #1a9562;
+    color: #000;
+    border: 1px solid #000;
+}
+
+.light-mode label, .light-mode input, .light-mode select {
+    color: #000;
+}
+
+.light-mode input[type="text"], .light-mode select {
+    background-color: lightgray;
+}
+
+.switch {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #1a9562;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.mode-label {
+    position: absolute;
+    top: 12px;
+    right: 60px;
+    color: #FFF;
+    font-size: 14px;
+}
+
+.light-mode .mode-label {
+    color: #000;
+}
+
+#overlay {
+    background-color: rgba(16, 16, 16, 0.9);
+    color: #aaa;
+}
+
+#overlay input[type="text"],
+#overlay select {
+    color: white;
+}
+
+#overlay.light-mode {
+    background-color: white;
+    color: black;
+    border-color: black;
+}
+
+#overlay.light-mode input[type="text"],
+#overlay.light-mode select {
+    background-color: lightgray;
+    color: black;
+}
+
+#overlay.light-mode select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: lightgray !important;
+}
