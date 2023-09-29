@@ -2,7 +2,11 @@
 
 ## Introduction
 
-This Chrome extension is designed to filter out non-entry-level jobs on LinkedIn, as the platform's native filtering system often falls short in this regard. It allows you to specify search terms, location, distance, and other parameters to find jobs that match your criteria. The extension also saves your preferences for future use. *Extension styling currently only works with dark mode.*
+This Chrome extension is designed to help filter out non-entry-level jobs on LinkedIn, as the platform's native filtering system often falls short in this regard. It allows you to specify search terms, location, distance, and other parameters to find jobs that match your criteria. The extension also saves your preferences for future use. Unfortunately LinkedIn's search has not been working correctly, evidently as far back as 2015 [as evidenced here](https://www.linkedin.com/pulse/why-doesnt-linkedin-fix-search-issues-barbara-preston-phd/?trackingId=HaH4PJ1FRoSyrB%2BLJGA2Ww%3D%3D) 
+
+## Quick Install
+
+- [Chrome Web Store Link](https://chrome.google.com/webstore/detail/nobs-linkedin-job-filter/comlhlhadkibegigjnfebklaalpbphni?hl=en&authuser=2)
 
 ## Setup Instructions
 
