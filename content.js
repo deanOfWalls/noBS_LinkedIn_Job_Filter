@@ -47,11 +47,8 @@ function showOverlay() {
               <input type="text" id="positiveTerms" value="" autocomplete="off"><br>
               
               <label for="negativeTerms">Negative Search Terms:</label>
-              <input type="text" id="negativeTerms" value="" list="defaultNegativeTerms" autocomplete="off"><br>
-              <datalist id="defaultNegativeTerms">
-                  <option value="Senior, Lead, Manager, Director, Principal, Mid, Experienced, 4+, 5+, 6+, 7+, 8+, II, III, IV, V, VI, VII, VIII"></option>
-              </datalist>
-              
+              <input type="text" id="negativeTerms" value="" autocomplete="off"><br>
+             
               <label for="location">Location:</label>
               <select id="location">
                   <option value="New Castle, Delaware, 101877462, USA">New Castle, Delaware, USA</option>
