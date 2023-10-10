@@ -10,7 +10,7 @@ function buildAndNavigateURL(city, state, country, geoId, keywords, distance, ti
     `geoId=${geoId || ''}`,
     `refresh=true`,
     `keywords=${encodeURIComponent(keywords)}`,
-    `f_E=2`  // Entry-level flag
+    `f_E=2,3`  // Entry-level flag
   ];
 
   if (timePosted === 'past24Hours') {
