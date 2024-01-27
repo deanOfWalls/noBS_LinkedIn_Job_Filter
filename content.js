@@ -1,41 +1,47 @@
+// Flag to track visibility state of the overlay
 let overlayVisible = false;
 
+// Function to construct URL with given search parameters and then navigate to it
 function buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote, easyApply) {
-  const jobId = getCurrentJobId();
-  const baseURL = 'https://www.linkedin.com/jobs/search/?';
+  const jobId = getCurrentJobId(); // retrieves current job id from the url
+  const baseURL = 'https://www.linkedin.com/jobs/search/?'; //base url for the job search
 
+// Array to hold URL parameters  
   let urlParams = [
-    `country=${country}`,
-    `currentJobId=${jobId}`,
-    `geoId=${geoId || ''}`,
-    `refresh=true`,
-    `keywords=${encodeURIComponent(keywords)}`,
-    `f_E=2,3`  // Entry-level flag
+    `country=${country}`, // adds the country to the search parameters
+    `currentJobId=${jobId}`, // adds the current job id to the search parameters
+    `geoId=${geoId || ''}`, // adds the geographical id or an empty string if not provided
+    `refresh=true`, //sets the refresh parameter to true
+    `keywords=${encodeURIComponent(keywords)}`, //encodes and adds the keywords
+    `f_E=2,3`  // Entry-level flag // flag for entry-level jobs
   ];
-
+// Adds a parameter for jobs posted in the last 24 hours, if specified
   if (timePosted === 'past24Hours') {
-    urlParams.push(`f_TPR=r86400`);  // Jobs posted within the last 24 hours
+    urlParams.push(`f_TPR=r86400`);
   }
-
+// Adds the city and state to the location parameter, if provided
   if (city && state) {
     const location = `${city}, ${state}, ${country}`;
     urlParams.push(`location=${encodeURIComponent(location)}`);
   }
-
+// Adds the distance parameter, unless it is set to 'none'
   if (distance !== 'none') {
     urlParams.push(`distance=${distance}`);
   }
-
+// Adds a parameter to filter for jobs with 'Easy Apply' option
   if (easyApply === 'Yes') {
     urlParams.push(`f_AL=true`);
   }
 
   const fullURL = `${baseURL}${urlParams.join('&')}`;
-  window.location.href = fullURL;
+  window.location.href = fullURL; // Navigates to the constructed URL
 }
 
+// Function to show the search overlay
 function showOverlay() {
+  // Retrieves user preferences from Chrome's storage
   chrome.storage.sync.get(['location', 'timePosted', 'remote', 'positiveTerms', 'negativeTerms', 'distance', 'easyApply', 'mode'], function (items) {
+    // HTML content for the overlay
     const overlayHTML = `
           <div id="overlay">
               <label class="mode-label">Dark/Light Mode</label>
@@ -260,10 +266,11 @@ function showOverlay() {
           </div>
       `;
 
-    const overlay = document.createElement('div');
-    overlay.innerHTML = overlayHTML;
-    document.body.appendChild(overlay);
-
+      const overlay = document.createElement('div'); // Creates a new div element
+      overlay.innerHTML = overlayHTML; // Sets the inner HTML of the div to the overlay content
+      document.body.appendChild(overlay); // Adds the overlay to the body of the document
+  
+    // Sets the form fields to the stored user preferences or default values
     document.getElementById('positiveTerms').value = items.positiveTerms || '';
     document.getElementById('negativeTerms').value = items.negativeTerms || '';
     document.getElementById('location').value = items.location || 'New Castle, Delaware, 101877462, USA';
@@ -272,13 +279,16 @@ function showOverlay() {
     document.getElementById('remote').value = items.remote || 'No';
     document.getElementById('easyApply').value = items.easyApply || 'No';
 
+    // Sets the light or dark mode based on user preference
     if (items.mode === 'light') {
       document.getElementById('overlay').classList.add('light-mode');
       document.getElementById('modeToggle').checked = true;
     }
 
+    // Event listener for the mode toggle switch
     const modeToggle = document.getElementById('modeToggle');
     modeToggle.addEventListener('change', function () {
+      // Toggles the light-mode class and updates the mode in storage
       if (modeToggle.checked) {
         document.getElementById('overlay').classList.add('light-mode');
         chrome.storage.sync.set({ mode: 'light' });
@@ -288,8 +298,10 @@ function showOverlay() {
       }
     });
 
+    // Event listener for the search button
     const searchButton = document.getElementById('searchButton');
     searchButton.addEventListener('click', function () {
+      // Retrieves values from form fields
       const locationValue = document.getElementById('location').value;
       const [city, state, geoId, country] = locationValue.split(', ');
 
@@ -300,12 +312,14 @@ function showOverlay() {
       const negativeTerms = document.getElementById('negativeTerms').value;
       const easyApply = document.getElementById('easyApply').value;
 
+      // Builds the keyword string, excluding negative terms
       let keywords = positiveTerms;
       if (negativeTerms) {
         const negativeTermsArray = negativeTerms.split(', ').map(term => term.trim());
         keywords = `${positiveTerms} NOT ${negativeTermsArray.join(' NOT ')}`;
       }
 
+      // Calls function to build URL and navigate, then saves user selections and hides the overlay
       buildAndNavigateURL(city, state, country, geoId, keywords, distance, timePosted, remote, easyApply);
       saveUserSelections(locationValue, timePosted, remote, positiveTerms, negativeTerms, distance, easyApply);
       hideOverlay();
@@ -313,6 +327,7 @@ function showOverlay() {
   });
 }
 
+// Function to hide the overlay
 function hideOverlay() {
   const overlay = document.getElementById('overlay');
   if (overlay) {
@@ -321,6 +336,7 @@ function hideOverlay() {
   }
 }
 
+// Function to get the current job ID from the URL
 function getCurrentJobId() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
@@ -328,12 +344,15 @@ function getCurrentJobId() {
   return jobId || '';
 }
 
+// Creates and adds the button to show/hide the overlay
 const button = document.createElement('button');
 button.id = 'overlayButton';
 button.style.backgroundImage = `url(${chrome.runtime.getURL('noBS.png')})`;
 document.body.appendChild(button);
 
+// Event listener for the overlay button
 button.addEventListener('click', function () {
+  // Toggles the overlay visibility
   if (overlayVisible) {
     hideOverlay();
   } else {
@@ -342,6 +361,7 @@ button.addEventListener('click', function () {
   overlayVisible = !overlayVisible;
 });
 
+// Function to save user selections to Chrome's storage
 function saveUserSelections(locationValue, timePosted, remote, positiveTerms, negativeTerms, distance, easyApply) {
   chrome.storage.sync.set({
     location: locationValue,
@@ -353,6 +373,7 @@ function saveUserSelections(locationValue, timePosted, remote, positiveTerms, ne
     easyApply: easyApply,
     mode: document.getElementById('modeToggle').checked ? 'light' : 'dark'
   }, function () {
+    // Logs an error message or a confirmation message
     if (chrome.runtime.lastError) {
       console.error("Error saving distance:", chrome.runtime.lastError);
     } else {
@@ -361,9 +382,11 @@ function saveUserSelections(locationValue, timePosted, remote, positiveTerms, ne
   });
 }
 
+// Function to load user selections from Chrome's storage
 function loadUserSelections() {
   if (chrome.storage) {
     chrome.storage.sync.get(['location', 'timePosted', 'remote', 'positiveTerms', 'negativeTerms', 'distance', 'easyApply', 'mode'], function (items) {
+      // Sets form fields to stored values or defaults
       if (document.getElementById('location')) {
         document.getElementById('location').value = items.location || 'New Castle, Delaware, 101877462, USA';
       }
